@@ -1,0 +1,81 @@
+#
+#  schema file for init script management
+#    modeled primarilly after Application agent
+#    attributes in Veritas Cluster Server.
+#
+                  1.3.6.1.4.1.1733.
+  attributetype ( 1.3.6.1.4.1.1733.9.1.1
+        NAME 'Description'
+        DESC 'Brief description of application'
+        EQUALITY caseExactIA5Match
+        SUBSTR caseExactIA5SubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.2
+        NAME 'User'
+        DESC 'User to run commands under'
+        EQUALITY caseExactIA5Match
+        SUBSTR caseExactIA5SubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.3
+        NAME 'StartProgram'
+        DESC 'Command to execute when starting application'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.4
+        NAME 'StopProgram'
+        DESC 'Command to execute when stopping application'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.5
+        NAME 'CleanProgram'
+        DESC 'Command to execute when you absolutely need to stop application'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.6
+        NAME 'MonitorProgram'
+        DESC 'Command to execute which returns status of application'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.7
+        NAME 'PidFile'
+        DESC 'Full path to file containing the process ID'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.8
+        NAME 'Critical'
+        DESC 'Boolean indicating if this application is important enough to keep running'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.9
+        NAME 'scriptHost'
+        DESC 'Host to define this init script on'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.10
+        NAME 'RunLevel'
+        DESC 'System runlevel to live within'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  attributetype ( 1.3.6.1.4.1.1733.9.1.11
+        NAME 'OrderNumber'
+        DESC 'Analogous to the number used in tradition S and K init script names'
+        EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+  objectclass ( 1.3.6.1.4.1.1733.9.2.1 NAME 'initScripts' SUP top STRUCTURAL
+        DESC 'runlevel init scripts management'
+        MUST ( cn )
+	MAY ( Description $ User $ StartProgram $ StopProgram $ 
+	      CleanProgram $ MonitorProgram $ PidFile $ Critical $ 
+	      scriptHost $ RunLevel $ OrderNumber )
+        )

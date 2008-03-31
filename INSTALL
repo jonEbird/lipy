@@ -1,0 +1,86 @@
+
+Quick and Dirty Guide to Updating a OpenLDAP Server
+
+
+1. Install openldap
+   "yum -y install openldap"
+
+2. Add the schema.
+   cp initScripts.schema /etc/openldap/schema/
+
+3. Instruct openldap to include the schema
+   LAST_LINE=$(egrep -n '^include.*schema$' /etc/openldap/slapd.conf | awk -F: '{ line = $1 } END { print line }')
+   cat <<EOF > slapd.ed.patch
+   ${LAST_LINE}a
+   include         /etc/openldap/schema/initScripts.schema
+   .
+   wq
+   EOF
+   ed --quiet slapd.conf < slapd.ed.patch
+
+4. Restart server
+   /etc/init.d/ldap restart
+
+5. Populating the initial DB
+   cat <<EOF > example-base.ldif
+   dn: dc=my-domain,dc=com
+   objectclass: dcObject
+   objectclass: organization
+   o: jonEbird Company
+   dc: my-domain
+   
+   dn: cn=Manager,dc=my-domain,dc=com
+   objectclass: organizationalRole
+   cn: Manager
+   EOF
+
+   ldapadd -v -x -D cn=Manager,dc=my-domain,dc=com -w secret -h localhost -f example-base.ldif
+   
+6. Add your first LDIF to create the OU
+
+   cat <<EOF > createOU.ldif
+   dn: ou=initScripts, dc=my-domain,dc=com
+   ou: initScripts
+   objectclass: top
+   objectclass: organizationalUnit
+   EOF
+   
+   ldapadd -x -D cn=Manager,dc=my-domain,dc=com -w secret -h localhost -f createOU.ldif 
+
+7. Add a sample entry.
+
+   cat <<EOF > example-initScript.ldif
+   dn: cn=BPN_QA, ou=initScripts, dc=my-domain,dc=com
+   Description: Start J2EE application in QA
+   User: uqa4bpn1
+   StartProgram: /path/to/start/script
+   StopProgram: /path/to/stop/script
+   CleanProgram: /path/to/clean/script
+   MonitorProgram: /path/to/monitor/script
+   PidFile: /path/to/pidfile
+   Critical: 0
+   scriptHost: uqa4app[0-9]+
+   RunLevel: 3
+   OrderNumber: 99
+   objectClass: top
+   objectClass: initScripts
+   cn: BPN_QA
+   EOF
+   
+   ldapadd -x -D cn=Manager,dc=my-domain,dc=com -w secret -h localhost -f example-initScript.ldif
+
+8. Run a ldapsearch to see your results.
+
+   ldapsearch -L -x -D cn=Manager,dc=my-domain,dc=com -b dc=my-domain,dc=com -w secret -h localhost
+
+9. Modify an entry
+
+   9a. Generate LDIF for desired object.
+   ldapsearch -L -x -D cn=Manager,dc=my-domain,dc=com -b ou=initScripts,dc=my-domain,dc=com -w secret -h localhost cn=BPN_QA > bpn_qa.ldif
+   9b. Edit the bpn_qa.ldif and update whatever necessary
+   9c. Update LDAP
+   ldapmodify -x -D cn=Manager,dc=my-domain,dc=com -w secret -h localhost -f bpn_qa.ldif
+
+10. Run another ldapsearch to see your results.
+
+   ldapsearch -L -x -D cn=Manager,dc=my-domain,dc=com -b ou=initScripts,dc=my-domain,dc=com -w secret -h localhost cn=BPN_QA
